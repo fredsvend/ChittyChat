@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+option go_package = "shitChat/service";
+
+package shitChat;
+
+
+service ShittyChat {
+    rpc Publish(stream UserMessage) returns (google.protobuf.Empty) {};
+    rpc Broadcast(google.protobuf.Empty) returns (stream UserMessage) {};
+}
+
+
+
+message UserMessage {
+    string username = 1;
+    string message = 2;
+    uint32 clock = 3;
+}
