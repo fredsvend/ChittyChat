@@ -80,7 +80,6 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 	username := uuid.Must(uuid.NewRandom()).String()[0:4]
 
 	server.messages[username] = make(chan *pb.UserMessage, 10)
-	server.serverClock.Increment()
 
 	server.users[username] = stream
 	server.clock[username] = pb.NewClock()
@@ -100,7 +99,7 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 		if message.GetMessage() == "" {
 			log.Printf("BROADCASTING: User %s just joined! Current clock: serverClock: [%d]", message.GetUsername(), server.serverClock.Counter)
 		} else {
-			log.Printf("BROADCASTING: User %s with clock: [%d] and just wrote %s", message.GetUsername(), maxClock, message.GetMessage())
+			log.Printf("BROADCASTING: User %s with clock: [%d] and just wrote %s", message.GetUsername(), message.GetClock(), message.GetMessage())
 			log.Printf("serverClock: [%d]", server.serverClock.Counter)
 		}
 	
