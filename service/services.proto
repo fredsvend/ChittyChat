@@ -1,12 +1,12 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
-option go_package = "shitChat/service";
+option go_package = "chitChat/service";
 
 package service;
 
 
-service ShittyChat {
+service ChittyChat {
     rpc Publish(stream UserMessage) returns (google.protobuf.Empty) {};
     rpc Broadcast(google.protobuf.Empty) returns (stream UserMessage) {};
 }

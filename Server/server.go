@@ -14,9 +14,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type ShittyChatServer struct {
-	pb.UnimplementedShittyChatServer
-	users    map[string]pb.ShittyChat_BroadcastServer
+type ChittyChatServer struct {
+	pb.UnimplementedChittyChatServer
+	users    map[string]pb.ChittyChat_BroadcastServer
 	clock    map[string]*pb.Clock
 	messages map[string]chan *pb.UserMessage
 
@@ -51,10 +51,10 @@ func main() {
 	fmt.Println("Starting a ShittyChat server")
 	s := grpc.NewServer()
 
-	s1 := ShittyChatServer{
+	s1 := ChittyChatServer{
 		clock: make(map[string](*pb.Clock)),
 		messages:    make(map[string](chan *pb.UserMessage)),
-		users:       make(map[string]pb.ShittyChat_BroadcastServer),
+		users:       make(map[string]pb.ChittyChat_BroadcastServer),
 		serverClock: pb.NewClock()}
 
 	var i,j int
@@ -66,7 +66,7 @@ func main() {
     }
 	fmt.Println("ShittyChat server has started successfully :----)")
 	
-	pb.RegisterShittyChatServer(s, &s1)
+	pb.RegisterChittyChatServer(s, &s1)
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("ShittyChat server has not started successfully :( %v", err)
@@ -75,7 +75,7 @@ func main() {
 	
 
 }
-func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat_BroadcastServer) error {
+func (server *ChittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ChittyChat_BroadcastServer) error {
 
 	username := uuid.Must(uuid.NewRandom()).String()[0:4]
 
@@ -113,7 +113,7 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 	return nil
 }
 
-func (server *ShittyChatServer) Publish(stream pb.ShittyChat_PublishServer) error {
+func (server *ChittyChatServer) Publish(stream pb.ChittyChat_PublishServer) error {
 
 	for {
 		message, err := stream.Recv()
@@ -147,7 +147,7 @@ func (server *ShittyChatServer) Publish(stream pb.ShittyChat_PublishServer) erro
 }
 
 
-func (server *ShittyChatServer) UserJoinMessage(emptyString string, username string, clock pb.Clock) {
+func (server *ChittyChatServer) UserJoinMessage(emptyString string, username string, clock pb.Clock) {
 	toSend := pb.UserMessage{Message: emptyString, Username: username, Clock: uint64(clock.Time())}
 
 	for _, user := range server.messages {

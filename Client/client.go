@@ -31,7 +31,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	client := service.NewShittyChatClient(conn)
+	client := service.NewChittyChatClient(conn)
 	context := context.Background()
 	
 	defer gg.Exit(context, -1)
@@ -65,7 +65,7 @@ func main() {
 	<-bl
 }
 
-func messageReceiver(stream service.ShittyChat_BroadcastClient, channel chan<- *service.UserMessage) {
+func messageReceiver(stream service.ChittyChat_BroadcastClient, channel chan<- *service.UserMessage) {
 	for {
 		msg, err := stream.Recv()
 		
@@ -84,7 +84,7 @@ func messageReceiver(stream service.ShittyChat_BroadcastClient, channel chan<- *
 	}
 }
 
-func messageSender(stream service.ShittyChat_PublishClient, mstream <-chan string) {
+func messageSender(stream service.ChittyChat_PublishClient, mstream <-chan string) {
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		message, err := reader.ReadString('\n')
