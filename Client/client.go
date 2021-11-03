@@ -73,7 +73,7 @@ func messageReceiver(stream service.ShittyChat_BroadcastClient, channel chan<- *
 			log.Fatal("Failed to receive message")
 		}
 		if msg.Message == "" {
-			log.Printf("User %s just joined!", msg.GetUsername())
+			log.Printf("User %s just joined! Current clock: [%d]", msg.GetUsername(), msg.GetClock())
 		}else{
 		log.Printf("%s has sent message %s", msg.GetUsername(), msg.GetMessage())
 		}
