@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"sync"
 
 	"github.com/google/uuid"
 
@@ -23,6 +24,7 @@ type ShittyChatServer struct {
 
 var (
 	userCount = 0
+	lock sync.Mutex
 )
 
 const (
@@ -77,17 +79,24 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 	server.messages[username] = make(chan *pb.UserMessage, 10)
 	server.serverClock.Increment()
 
-	server.UserJoinMessage("", username)
+	server.users[username] = stream
+	server.clock[username] = pb.NewClock()
+	server.UserJoinMessage("", username, *server.clock[username])
+	
+	lock.Lock()
+	server.serverClock.Increment()
+	lock.Unlock()
+
 
 	for {
 		message := <-server.messages[username]
 		maxClock := computeMax(message.GetClock(), server.serverClock.Counter)
 		message.Clock = maxClock
-
+		lock.Lock()
 		server.serverClock.Increment()
+		lock.Unlock()
 		if message.GetMessage() == "" {
-			log.Printf("BROADCASTING: User %s just joined!", message.GetUsername())
-			log.Printf("serverClock: [%d]", server.serverClock.Counter)
+			log.Printf("BROADCASTING: User %s just joined! Current clock: serverClock: [%d]", message.GetUsername(), server.serverClock.Counter)
 		} else {
 			log.Printf("BROADCASTING: User %s with clock: [%d] and just wrote %s", message.GetUsername(), maxClock, message.GetMessage())
 			log.Printf("serverClock: [%d]", server.serverClock.Counter)
@@ -124,7 +133,9 @@ func (server *ShittyChatServer) Publish(stream pb.ShittyChat_PublishServer) erro
 		}
 
 		server.serverClock.Counter = computeMax(server.serverClock.Counter, message.GetClock())
-		server.serverClock.Counter++
+		lock.Lock()
+		server.serverClock.Increment()
+		lock.Unlock()
 
 		for _, user := range server.messages {
 			user <- message

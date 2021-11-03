@@ -73,7 +73,7 @@ func messageReceiver(stream service.ShittyChat_BroadcastClient, channel chan<- *
 			log.Fatal("Failed to receive message")
 		}
 		if msg.Message == "" {
-			log.Printf("User %s just joined!", msg.GetUsername())
+			log.Printf("User %s just joined! Current clock: [%d]", msg.GetUsername(), msg.GetClock())
 		}else{
 		log.Printf("%s has sent message %s", msg.GetUsername(), msg.GetMessage())
 		}
@@ -88,6 +88,10 @@ func messageSender(stream service.ShittyChat_PublishClient, mstream <-chan strin
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		message, err := reader.ReadString('\n')
+		if(len(message)>128){
+			fmt.Println("<<<Your message has to be contained in less than 129 letters!>>>")
+		
+		}else{
 		if err != nil {
 			log.Fatal("DIDNT READ")
 		}
@@ -96,6 +100,7 @@ func messageSender(stream service.ShittyChat_PublishClient, mstream <-chan strin
 		clock++
 		userMessage := service.UserMessage{Username: username, Message: message, Clock: clock}
 		stream.Send(&userMessage)
+	}
 	}
 }
 
