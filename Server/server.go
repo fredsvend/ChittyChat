@@ -16,7 +16,6 @@ import (
 type ShittyChatServer struct {
 	pb.UnimplementedShittyChatServer
 	users    map[string]pb.ShittyChat_BroadcastServer
-	clock    map[string]*pb.Clock
 	messages map[string]chan *pb.UserMessage
 
 	serverClock *pb.Clock
@@ -50,27 +49,25 @@ func main() {
 	s := grpc.NewServer()
 
 	s1 := ShittyChatServer{
-		clock: make(map[string](*pb.Clock)),
 		messages:    make(map[string](chan *pb.UserMessage)),
 		users:       make(map[string]pb.ShittyChat_BroadcastServer),
 		serverClock: pb.NewClock()}
 
-	var i,j int
-    for i = 0; i < 10; i++ {
-        for j = 0; j < 10; j++ {
-            fmt.Print("* ")
-        }
-        fmt.Println()
-    }
+	var i, j int
+	for i = 0; i < 10; i++ {
+		for j = 0; j < 10; j++ {
+			fmt.Print("* ")
+		}
+		fmt.Println()
+	}
 	fmt.Println("ShittyChat server has started successfully :----)")
-	
+
 	pb.RegisterShittyChatServer(s, &s1)
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("ShittyChat server has not started successfully :( %v", err)
 
 	}
-	
 
 }
 func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat_BroadcastServer) error {
@@ -80,9 +77,7 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 	server.messages[username] = make(chan *pb.UserMessage, 10)
 	server.serverClock.Increment()
 
-	server.users[username] = stream
-	server.clock[username] = pb.NewClock()
-	server.UserJoinMessage("", username, *server.clock[username])
+	server.UserJoinMessage("", username)
 
 	for {
 		message := <-server.messages[username]
@@ -97,9 +92,9 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 			log.Printf("BROADCASTING: User %s with clock: [%d] and just wrote %s", message.GetUsername(), maxClock, message.GetMessage())
 			log.Printf("serverClock: [%d]", server.serverClock.Counter)
 		}
-	
+
 		err := server.users[username].Send(message)
-		
+
 		if err != nil {
 			break
 		}
@@ -123,7 +118,7 @@ func (server *ShittyChatServer) Publish(stream pb.ShittyChat_PublishServer) erro
 		}
 
 		if message.GetMessage() == "" {
-			
+
 		} else {
 			log.Printf("PUBLISHING: User %s with clock: [%d] just wrote %s", message.GetUsername(), message.GetClock(), message.GetMessage())
 		}
@@ -139,9 +134,8 @@ func (server *ShittyChatServer) Publish(stream pb.ShittyChat_PublishServer) erro
 	return nil
 }
 
-
-func (server *ShittyChatServer) UserJoinMessage(emptyString string, username string, clock pb.Clock) {
-	toSend := pb.UserMessage{Message: emptyString, Username: username, Clock: uint64(clock.Time())}
+func (server *ShittyChatServer) UserJoinMessage(emptyString string, username string) {
+	toSend := pb.UserMessage{Message: emptyString, Username: username}
 
 	for _, user := range server.messages {
 		user <- &toSend
