@@ -1,4 +1,4 @@
-# ShittyChat
+# Chitty-Chat
 
 
 ## Run the Project
