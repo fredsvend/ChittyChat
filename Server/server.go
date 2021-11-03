@@ -91,8 +91,7 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 
 		server.serverClock.Increment()
 		if message.GetMessage() == "" {
-			log.Printf("BROADCASTING: User %s just joined!", message.GetUsername())
-			log.Printf("serverClock: [%d]", server.serverClock.Counter)
+			log.Printf("BROADCASTING: User %s just joined! Current clock: serverClock: [%d]", message.GetUsername(), server.serverClock.Counter)
 		} else {
 			log.Printf("BROADCASTING: User %s with clock: [%d] and just wrote %s", message.GetUsername(), maxClock, message.GetMessage())
 			log.Printf("serverClock: [%d]", server.serverClock.Counter)

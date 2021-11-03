@@ -48,3 +48,20 @@
 2021/11/03 15:12:17 serverClock: [33]
 2021/11/03 15:12:17 BROADCASTING: User Frede with clock: [31] and just wrote ja, Hej sus!
 2021/11/03 15:12:17 serverClock: [33]
+2021/11/03 15:21:23 PUBLISHING: User frede with clock: [1] just wrote 
+2021/11/03 15:21:23 BROADCASTING: User frede with clock: [34] and just wrote 
+2021/11/03 15:21:23 serverClock: [36]
+2021/11/03 15:21:23 BROADCASTING: User frede with clock: [35] and just wrote 
+2021/11/03 15:21:23 serverClock: [39]
+2021/11/03 15:21:23 BROADCASTING: User frede with clock: [36] and just wrote 
+2021/11/03 15:21:23 serverClock: [39]
+2021/11/03 15:21:23 BROADCASTING: User 71e6 just joined!
+2021/11/03 15:21:23 serverClock: [40]
+2021/11/03 15:21:23 BROADCASTING: User 71e6 just joined!
+2021/11/03 15:21:23 serverClock: [40]
+2021/11/03 15:21:27 frede just joined
+2021/11/03 15:21:27 PUBLISHING: User frede with clock: [41] just wrote okay sir
+2021/11/03 15:21:27 BROADCASTING: User frede with clock: [42] and just wrote okay sir
+2021/11/03 15:21:27 serverClock: [44]
+2021/11/03 15:21:27 BROADCASTING: User frede with clock: [43] and just wrote okay sir
+2021/11/03 15:21:27 serverClock: [44]
