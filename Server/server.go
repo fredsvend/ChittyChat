@@ -41,14 +41,14 @@ func main() {
 	defer f.Close()
 
 	log.SetOutput(f)
-	log.Println("This is the start of the ShittyChat log")
+	log.Println("This is the start of the ChittyChat log")
 
 	lis, err := net.Listen("tcp", port)
 
 	if err != nil {
 		log.Fatalf("Failed to listen %v", err)
 	}
-	fmt.Println("Starting a ShittyChat server")
+	fmt.Println("Starting a ChittyChat server")
 	s := grpc.NewServer()
 
 	s1 := ChittyChatServer{
@@ -64,12 +64,12 @@ func main() {
         }
         fmt.Println()
     }
-	fmt.Println("ShittyChat server has started successfully :----)")
+	fmt.Println("ChittyChat server has started successfully :----)")
 	
 	pb.RegisterChittyChatServer(s, &s1)
 
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("ShittyChat server has not started successfully :( %v", err)
+		log.Fatalf("ChittyChat server has not started successfully :( %v", err)
 
 	}
 	
