@@ -72,7 +72,6 @@ func main() {
 		log.Fatalf("ChittyChat server has not started successfully :( %v", err)
 
 	}
-	
 
 }
 func (server *ChittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ChittyChat_BroadcastServer) error {
@@ -89,6 +88,7 @@ func (server *ChittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ChittyChat
 	server.serverClock.Increment()
 	lock.Unlock()
 
+
 	for {
 		message := <-server.messages[username]
 		maxClock := computeMax(message.GetClock(), server.serverClock.Counter)
@@ -102,9 +102,9 @@ func (server *ChittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ChittyChat
 			log.Printf("BROADCASTING: User %s with clock: [%d] and just wrote %s", message.GetUsername(), message.GetClock(), message.GetMessage())
 			log.Printf("serverClock: [%d]", server.serverClock.Counter)
 		}
-	
+
 		err := server.users[username].Send(message)
-		
+
 		if err != nil {
 			break
 		}
@@ -128,7 +128,7 @@ func (server *ChittyChatServer) Publish(stream pb.ChittyChat_PublishServer) erro
 		}
 
 		if message.GetMessage() == "" {
-			
+
 		} else {
 			log.Printf("PUBLISHING: User %s with clock: [%d] just wrote %s", message.GetUsername(), message.GetClock(), message.GetMessage())
 		}
@@ -146,9 +146,9 @@ func (server *ChittyChatServer) Publish(stream pb.ChittyChat_PublishServer) erro
 	return nil
 }
 
-
 func (server *ChittyChatServer) UserJoinMessage(emptyString string, username string, clock pb.Clock) {
 	toSend := pb.UserMessage{Message: emptyString, Username: username, Clock: uint64(clock.Time())}
+
 
 	for _, user := range server.messages {
 		user <- &toSend
