@@ -14,9 +14,10 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type ShittyChatServer struct {
-	pb.UnimplementedShittyChatServer
-	users    map[string]pb.ShittyChat_BroadcastServer
+type ChittyChatServer struct {
+	pb.UnimplementedChittyChatServer
+	users    map[string]pb.ChittyChat_BroadcastServer
+	clock    map[string]*pb.Clock
 	messages map[string]chan *pb.UserMessage
 
 	serverClock *pb.Clock
@@ -40,44 +41,44 @@ func main() {
 	defer f.Close()
 
 	log.SetOutput(f)
-	log.Println("This is the start of the ShittyChat log")
+	log.Println("This is the start of the ChittyChat log")
 
 	lis, err := net.Listen("tcp", port)
 
 	if err != nil {
 		log.Fatalf("Failed to listen %v", err)
 	}
-	fmt.Println("Starting a ShittyChat server")
+	fmt.Println("Starting a ChittyChat server")
 	s := grpc.NewServer()
 
-	s1 := ShittyChatServer{
+	s1 := ChittyChatServer{
+		clock: make(map[string](*pb.Clock)),
 		messages:    make(map[string](chan *pb.UserMessage)),
-		users:       make(map[string]pb.ShittyChat_BroadcastServer),
+		users:       make(map[string]pb.ChittyChat_BroadcastServer),
 		serverClock: pb.NewClock()}
 
-	var i, j int
-	for i = 0; i < 10; i++ {
-		for j = 0; j < 10; j++ {
-			fmt.Print("* ")
-		}
-		fmt.Println()
-	}
-	fmt.Println("ShittyChat server has started successfully :----)")
-
-	pb.RegisterShittyChatServer(s, &s1)
+	var i,j int
+    for i = 0; i < 10; i++ {
+        for j = 0; j < 10; j++ {
+            fmt.Print("* ")
+        }
+        fmt.Println()
+    }
+	fmt.Println("ChittyChat server has started successfully :----)")
+	
+	pb.RegisterChittyChatServer(s, &s1)
 
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("ShittyChat server has not started successfully :( %v", err)
+		log.Fatalf("ChittyChat server has not started successfully :( %v", err)
 
 	}
 
 }
-func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat_BroadcastServer) error {
+func (server *ChittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ChittyChat_BroadcastServer) error {
 
 	username := uuid.Must(uuid.NewRandom()).String()[0:4]
 
 	server.messages[username] = make(chan *pb.UserMessage, 10)
-	server.serverClock.Increment()
 
 	server.users[username] = stream
 	server.clock[username] = pb.NewClock()
@@ -98,7 +99,7 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 		if message.GetMessage() == "" {
 			log.Printf("BROADCASTING: User %s just joined! Current clock: serverClock: [%d]", message.GetUsername(), server.serverClock.Counter)
 		} else {
-			log.Printf("BROADCASTING: User %s with clock: [%d] and just wrote %s", message.GetUsername(), maxClock, message.GetMessage())
+			log.Printf("BROADCASTING: User %s with clock: [%d] and just wrote %s", message.GetUsername(), message.GetClock(), message.GetMessage())
 			log.Printf("serverClock: [%d]", server.serverClock.Counter)
 		}
 
@@ -112,7 +113,7 @@ func (server *ShittyChatServer) Broadcast(_ *emptypb.Empty, stream pb.ShittyChat
 	return nil
 }
 
-func (server *ShittyChatServer) Publish(stream pb.ShittyChat_PublishServer) error {
+func (server *ChittyChatServer) Publish(stream pb.ChittyChat_PublishServer) error {
 
 	for {
 		message, err := stream.Recv()
@@ -145,8 +146,9 @@ func (server *ShittyChatServer) Publish(stream pb.ShittyChat_PublishServer) erro
 	return nil
 }
 
-func (server *ShittyChatServer) UserJoinMessage(emptyString string, username string) {
-	toSend := pb.UserMessage{Message: emptyString, Username: username}
+func (server *ChittyChatServer) UserJoinMessage(emptyString string, username string, clock pb.Clock) {
+	toSend := pb.UserMessage{Message: emptyString, Username: username, Clock: uint64(clock.Time())}
+
 
 	for _, user := range server.messages {
 		user <- &toSend

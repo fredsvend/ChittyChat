@@ -9,9 +9,9 @@ import (
 	"os"
 	"strings"
 
+	gg "github.com/thecodeteam/goodbye"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
-	gg "github.com/thecodeteam/goodbye"
 )
 
 var (
@@ -20,20 +20,19 @@ var (
 )
 
 func main() {
-	
-	
+
 	port := "localhost:8080"
 
-	fmt.Println("Trying to connect to ShittyChat")
+	fmt.Println("Trying to connect to ChittyChat")
 	conn, err := grpc.Dial(port, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("Could not connect %v", err)
 	}
 	defer conn.Close()
 
-	client := service.NewShittyChatClient(conn)
+	client := service.NewChittyChatClient(conn)
 	context := context.Background()
-	
+
 	defer gg.Exit(context, -1)
 
 	out, err := client.Publish(context)
@@ -45,7 +44,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to receive chat message broadcast")
 	}
-	fmt.Println("<<<<<Hello there, and welcome to ShittyChat!>>>>>")
+	fmt.Println("<<<<<Hello there, and welcome to ChittyChat!>>>>>")
 	fmt.Println("<<<Enter username!>>>")
 	reader := bufio.NewReader(os.Stdin)
 	username, err = reader.ReadString('\n')
@@ -55,7 +54,7 @@ func main() {
 	username = strings.TrimRight(username, "\r\n")
 	fmt.Println("<<<Now you are ready to chat! Simply type a message and press Enter>>>")
 	clock = 0
-	
+
 	channel := make(chan (*service.UserMessage), 1000)
 	stream := make(chan (string))
 	go messageReceiver(in, channel)
@@ -65,17 +64,17 @@ func main() {
 	<-bl
 }
 
-func messageReceiver(stream service.ShittyChat_BroadcastClient, channel chan<- *service.UserMessage) {
+func messageReceiver(stream service.ChittyChat_BroadcastClient, channel chan<- *service.UserMessage) {
 	for {
 		msg, err := stream.Recv()
-		
+
 		if err != nil {
 			log.Fatal("Failed to receive message")
 		}
 		if msg.Message == "" {
 			log.Printf("User %s just joined! Current clock: [%d]", msg.GetUsername(), msg.GetClock())
-		}else{
-		log.Printf("%s has sent message %s", msg.GetUsername(), msg.GetMessage())
+		} else {
+			log.Printf("%s has sent message %s", msg.GetUsername(), msg.GetMessage())
 		}
 
 		clock = computeMax(clock, (msg.GetClock()))
@@ -84,28 +83,28 @@ func messageReceiver(stream service.ShittyChat_BroadcastClient, channel chan<- *
 	}
 }
 
-func messageSender(stream service.ShittyChat_PublishClient, mstream <-chan string) {
+func messageSender(stream service.ChittyChat_PublishClient, mstream <-chan string) {
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		message, err := reader.ReadString('\n')
-		if(len(message)>128){
+		if len(message) > 128 {
 			fmt.Println("<<<Your message has to be contained in less than 129 letters!>>>")
-		
-		}else{
-		if err != nil {
-			log.Fatal("DIDNT READ")
-		}
-		message = strings.TrimSuffix(message, "\n")
 
-		clock++
-		userMessage := service.UserMessage{Username: username, Message: message, Clock: clock}
-		stream.Send(&userMessage)
-	}
+		} else {
+			if err != nil {
+				log.Fatal("DIDNT READ")
+			}
+			message = strings.TrimSuffix(message, "\n")
+
+			clock++
+			userMessage := service.UserMessage{Username: username, Message: message, Clock: clock}
+			stream.Send(&userMessage)
+		}
 	}
 }
 
 func computeMax(x uint64, y uint64) uint64 {
-	if (x > y) {
+	if x > y {
 		return x
 	} else {
 		return y

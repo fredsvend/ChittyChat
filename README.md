@@ -1,6 +1,7 @@
 # Chitty-Chat
 
 
+
 ## Run the Project
 
 To run the project go to the server folder and enter the command `go run .`
